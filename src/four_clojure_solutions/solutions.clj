@@ -13,9 +13,6 @@
 
 ; group a sequence
 
-;(defn my-group-by [f s]
-;  (apply hash-map (interleave (map f s) s)))
-
 (defn my-group-by [f s]
   (letfn [(get-singleton-maps [f s] 
                               (for [[k v] (partition 2 (interleave (map f s) s))]
