@@ -1,0 +1,15 @@
+/target
+/classes
+/checkouts
+pom.xml
+pom.xml.asc
+*.jar
+*.class
+/.lein-*
+/.nrepl-port
+/.classpath
+/.project
+/.settings/ccw.repl.cmdhistory.prefs
+/LICENSE
+/README.md
+/bin/four_clojure_solutions
