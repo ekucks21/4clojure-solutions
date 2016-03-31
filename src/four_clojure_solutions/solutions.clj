@@ -21,6 +21,11 @@
                                         ;
 ;; pascal's triangle
 
+(defn tree-to-table [amap]
+  (for [parent-key (keys amap)
+        child-key (keys (parent-key amap))]
+    [[parent-key child-key] (get-in amap [parent-key child-key])]))
+
 (defn insert [n alon]
   (cond
        (empty? alon) (cons n nil)
@@ -98,7 +103,39 @@
         (reverse-tree (nth tree 2)))))
 
 (defn count-nodes [tree]
-  (letfn [count-children (let [child-count (map #(if (coll? %) (count-children %) 0) tree)
-                               child-and-parent-count (map inc child-count)]
-                           (reduce + child-and-parent-count))]
+  (letfn [(count-children [tree] (let [child-count (map #(if (coll? %) (count-children %) 0) tree)
+                                       child-and-parent-count (map inc child-count)]
+                                   (reduce + child-and-parent-count)))]
     (inc (count-children tree))))
+
+(defn seq-type? [aseq]
+  (letfn [(is-set? [aseq] (let [orig-count (count aseq)
+                                conjed (conj aseq 1 1)]
+                            (= (inc orig-count) (count conjed))))
+          (is-vector? [aseq] (let [unique-marker1 (gensym)
+                                   unique-marker2 (gensym)
+                                   conjed (conj aseq unique-marker1 unique-marker2)]
+                               (condp = unique-marker2
+                                 (first conjed) false
+                                 (last conjed) true)))
+          (is-list? [aseq] (let [unique-marker1 (gensym)
+                                 unique-marker2 (gensym)
+                                 conjed (conj aseq unique-marker1 unique-marker2)]
+                             (condp = unique-marker2
+                               (first conjed) true
+                               (last conjed) false)))
+          (is-map? [aseq] (let [unique-marker (gensym)
+                                pairs-to-conj {:whatever 1 unique-marker 2}
+                                conjed (conj aseq pairs-to-conj)]
+                            (not (or (= pairs-to-conj (first conjed))
+                                     (= pairs-to-conj (last conjed))))))]
+    (cond
+      (is-map? aseq) :map
+      (is-set? aseq) :set
+      (is-list? aseq) :list
+      (is-vector? aseq) :vector)))
+
+(defn find-anagrams [avec]
+  (let [words-by-chars (group-by sort avec)
+        two-or-more-words? (comp (partial < 1) count val)]
+    (into #{} (map (partial into #{}) (vals (filter two-or-more-words? words-by-chars))))))
