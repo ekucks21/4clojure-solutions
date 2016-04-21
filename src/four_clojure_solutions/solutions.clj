@@ -1,4 +1,5 @@
-(ns four-clojure-solutions.solutions)
+(ns four-clojure-solutions.solutions
+  (:require [com.rpl.specter :refer [filterer]]))
 
 (defn infix [x & args]
   (reduce 
@@ -138,4 +139,52 @@
 (defn find-anagrams [avec]
   (let [words-by-chars (group-by sort avec)
         two-or-more-words? (comp (partial < 1) count val)]
-    (into #{} (map (partial into #{}) (vals (filter two-or-more-words? words-by-chars))))))
+    (set (map set (vals (filter two-or-more-words? words-by-chars))))))
+
+(defn reduction-steps
+  ([f aseq] (reduction-steps f (first aseq) (rest aseq)))
+  ([f value aseq]
+   (lazy-seq (if (first aseq)
+               (cons value (reduction-steps f (f value (first aseq)) (rest aseq)))
+               (cons value aseq)))))
+
+(defn perfect? [x]
+  (let [divisors (filter #(= 0 (mod x %)) (rest (range (+ 1 (/ x 2)))))]
+    (= x (apply + divisors))))
+
+(defn into-camel-case [s]
+  (clojure.string/replace s #"-([a-z])" #(clojure.string/upper-case (second %1))))
+
+(defn my-merge-with [f first-map & maps]
+  (letfn [(merge-map [m1 m2] (reduce merge-entry m1 m2))
+          (merge-entry [m [key value]]
+            (if (get m key)
+              (assoc m key (f (get m key) value))
+              (assoc m key value)))]
+    (reduce merge-map first-map maps)))
+
+(defn reverse-even-in-range [coll x y]
+  (let [head (take x coll)
+        sub-range (subvec coll x y)
+        tail (subvec coll y)
+        even-odd (group-by even? sub-range)
+        even-reverse (reverse (even-odd true))
+        new-sub-range (let [[smaller larger] (if (> (count even-reverse) (count (even-odd false)))
+                                               [(even-odd false) even-reverse]
+                                               [even-reverse (even-odd false)])
+                            remainder (take-last (- (count larger) (count smaller)) larger)
+                            interleaved (if (even? (first sub-range))
+                                         (interleave even-reverse (even-odd false))
+                                         (interleave (even-odd false) even-reverse))]
+                        (concat interleaved remainder))]
+    (vec (concat head new-sub-range tail))))
+
+(defn specter-reverse-even-in-range [coll x y]
+  (transform [(srange x y) (filterer even?)] reverse coll))
+
+(defn cond-inc [coll]
+  (reduce (fn [new-coll amap]
+            (conj new-coll (if (even? (amap :a))
+                             (update amap :c (comp vec (partial map inc)))
+                             (update amap :d inc))))
+          [] coll))
