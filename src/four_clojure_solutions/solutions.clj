@@ -188,3 +188,14 @@
                              (update amap :c (comp vec (partial map inc)))
                              (update amap :d inc))))
           [] coll))
+
+(defn totient [x]
+  (case x
+    1 1
+    (letfn [(greatest-common-divisor [x y]
+              (let [[smaller larger] (sort [x y])
+                    candidates (reverse (range 1 (inc smaller)))]
+                (first (filter #(every? identity (map (comp (fn [num] (zero? num))
+                                                            (fn [num] (rem num %))) [x y]))
+                               candidates))))]
+      (count (filter (comp (partial = 1) (partial greatest-common-divisor x)) (range 1 x))))))
