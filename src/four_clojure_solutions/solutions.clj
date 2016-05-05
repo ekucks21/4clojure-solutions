@@ -199,3 +199,12 @@
                                                             (fn [num] (rem num %))) [x y]))
                                candidates))))]
       (count (filter (comp (partial = 1) (partial greatest-common-divisor x)) (range 1 x))))))
+
+(defn happy-number? [x]
+  (let [digits (fn [y] (->> y
+                            (iterate #(quot % 10))
+                            (take-while pos?)
+                            (mapv #(mod % 10))
+                            rseq))
+        square-sums (iterate (fn [coll] (apply + (map #(int (Math/pow % 2)) (digits coll)))) x)]
+    (= 1 (first (filter #(= 1 %) (take 10000 square-sums))))))
