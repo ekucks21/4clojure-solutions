@@ -208,3 +208,6 @@
                             rseq))
         square-sums (iterate (fn [coll] (apply + (map #(int (Math/pow % 2)) (digits coll)))) x)]
     (= 1 (first (filter #(= 1 %) (take 10000 square-sums))))))
+
+(defn my-trampoline [f & args]
+  (first (drop-while fn? (iterate #(%) (apply f args)))))
