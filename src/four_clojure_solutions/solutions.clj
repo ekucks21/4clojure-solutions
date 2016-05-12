@@ -211,3 +211,14 @@
 
 (defn my-trampoline [f & args]
   (first (drop-while fn? (iterate #(%) (apply f args)))))
+
+(defn balanced? [n]
+  (let [digits (fn [y] (->> y
+                            (iterate #(quot % 10))
+                            (take-while pos?)
+                            (mapv #(mod % 10))
+                            rseq))
+        n-digits (digits n)
+        digits-count (int (Math/ceil (/ (count n-digits) 2)))]
+    (= (apply + (take digits-count n-digits))
+       (apply + (take-last digits-count n-digits)))))
