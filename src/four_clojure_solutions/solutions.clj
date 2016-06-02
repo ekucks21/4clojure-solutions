@@ -1,5 +1,6 @@
 (ns four-clojure-solutions.solutions
-  (:require [com.rpl.specter :refer [filterer]]))
+  (:require [clojure.set :as s]
+            [com.rpl.specter :refer [srange filterer transform]]))
 
 (defn infix [x & args]
   (reduce 
@@ -222,3 +223,9 @@
         digits-count (int (Math/ceil (/ (count n-digits) 2)))]
     (= (apply + (take digits-count n-digits))
        (apply + (take-last digits-count n-digits)))))
+
+(defn power-set [s]
+  (case s
+    #{} #{#{}}
+    (let [subsets-without-first (power-set (disj s (first s)))]
+      (s/union subsets-without-first (map #(conj % (first s)) subsets-without-first)))))
