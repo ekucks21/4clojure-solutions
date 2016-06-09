@@ -229,3 +229,6 @@
     #{} #{#{}}
     (let [subsets-without-first (power-set (disj s (first s)))]
       (s/union subsets-without-first (map #(conj % (first s)) subsets-without-first)))))
+
+(defn equivalance-classes [f s]
+  (set (map set (vals (group-by f s)))))
