@@ -232,3 +232,11 @@
 
 (defn equivalance-classes [f s]
   (set (map set (vals (group-by f s)))))
+
+(defn keys-and-values [s]
+  (first (reduce (fn [[m current-key] item]
+                   (let [v (if (keyword? item) [] [item])
+                         next-key (if (keyword? item) item current-key)]
+                     [(merge-with (comp vec concat) m {next-key v})
+                      next-key]))
+                 [{}] s)))
