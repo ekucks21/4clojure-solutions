@@ -240,3 +240,10 @@
                      [(merge-with (comp vec concat) m {next-key v})
                       next-key]))
                  [{}] s)))
+
+(defn digits-and-bases [x base]
+  (->> x
+       (iterate #(quot % base))
+       (take-while (complement neg?))
+       (mapv #(mod % base))
+       rseq))
