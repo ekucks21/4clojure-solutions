@@ -242,8 +242,10 @@
                  [{}] s)))
 
 (defn digits-and-bases [x base]
-  (->> x
-       (iterate #(quot % base))
-       (take-while (complement neg?))
-       (mapv #(mod % base))
-       rseq))
+  (if (zero? x)
+    [0]
+    (->> x
+         (iterate #(quot % base))
+         (take-while (complement zero?))
+         (mapv #(mod % base))
+         rseq)))
