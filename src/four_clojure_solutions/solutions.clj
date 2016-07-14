@@ -252,4 +252,4 @@
 
 (defn oscilrate [x f & rest-fns]
   (let [result (f x)]
-    (lazy-seq (cons result (oscilrate result (conj rest-fns f))))))
+    (lazy-seq (cons x (apply oscilrate result (conj (vec rest-fns) f))))))
