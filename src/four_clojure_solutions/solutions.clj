@@ -249,3 +249,7 @@
          (take-while (complement zero?))
          (mapv #(mod % base))
          rseq)))
+
+(defn oscilrate [x f & rest-fns]
+  (let [result (f x)]
+    (lazy-seq (cons result (oscilrate result (conj rest-fns f))))))
