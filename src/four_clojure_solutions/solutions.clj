@@ -253,3 +253,8 @@
 (defn oscilrate [x f & rest-fns]
   (let [result (f x)]
     (lazy-seq (cons x (apply oscilrate result (conj (vec rest-fns) f))))))
+
+(defn seq-pronunciations [xs]
+  (letfn [(pronunciation [nums]
+            (mapcat (juxt count first) (partition-by identity nums)))]
+    (rest (iterate pronunciation xs))))
