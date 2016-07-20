@@ -258,3 +258,6 @@
   (letfn [(pronunciation [nums]
             (mapcat (juxt count first) (partition-by identity nums)))]
     (rest (iterate pronunciation xs))))
+
+(defn decurry [f]
+  (last (filter fn? (iterate #() f))))
