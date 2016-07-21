@@ -260,4 +260,4 @@
     (rest (iterate pronunciation xs))))
 
 (defn decurry [f]
-  (last (filter fn? (iterate #() f))))
+  (fn [& args] (reduce #(% %2) f args)))
