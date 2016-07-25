@@ -261,3 +261,8 @@
 
 (defn decurry [f]
   (fn [& args] (reduce #(% %2) f args)))
+
+(defn lazy-search [xs & rest-xs]
+  (let [sorted-contains? (fn [x coll] (some (partial = x) (filter (partial >= x) coll)))
+        every-contains? (fn [x xs] (every? #(sorted-contains? x %) xs))]
+    (first (filter #(every-contains? % rest-xs) xs))))
