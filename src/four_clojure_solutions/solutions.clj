@@ -266,3 +266,10 @@
   (let [sorted-contains? (fn [x coll] (some (partial = x) (take-while (partial >= x) coll)))
         every-contains? (fn [x xs] (every? #(sorted-contains? x %) xs))]
     (first (filter #(every-contains? % rest-xs) xs))))
+
+(defn partial-flatten [& nested]
+  (filter #(and (coll? %) (->> %
+                               first
+                               coll?
+                               not))
+          (tree-seq coll? identity nested)))
