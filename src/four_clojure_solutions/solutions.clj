@@ -273,3 +273,11 @@
                                coll?
                                not))
           (tree-seq coll? identity nested)))
+
+(defn global-take-while [n p xs]
+  (letfn [(step [num-matched [x & more]]
+            (let [new-num-matched (if (p x) (inc num-matched) num-matched)]
+              (if (= new-num-matched n)
+                nil
+                (lazy-seq (cons x (step new-num-matched more))))))]
+    (step 0 xs)))

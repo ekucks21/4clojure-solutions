@@ -22,3 +22,10 @@
 
 (deftest partial-flatten-test
   (is (= (partial-flatten [["Do"] ["Nothing"]]) [["Do"] ["Nothing"]])))
+
+(deftest global-take-while-test
+  (is (= [2 3 5 7 11 13] (global-take-while 4
+                                            #(= 2 (mod % 3))
+                                            [2 3 5 7 11 13 17 19 23])))
+  (is (= ["this" "is" "a" "sentence"]
+         (global-take-while 3 #(some #{\i} %) ["this" "is" "a" "sentence" "i" "wrote"]))))
