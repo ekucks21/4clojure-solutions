@@ -29,3 +29,15 @@
                                             [2 3 5 7 11 13 17 19 23])))
   (is (= ["this" "is" "a" "sentence"]
          (global-take-while 3 #(some #{\i} %) ["this" "is" "a" "sentence" "i" "wrote"]))))
+
+(deftest insert-when-test
+  (is (= '(1 :less 6 :less 7 4 3) (insert-when < :less [1 6 7 4 3])))
+  (is (empty? (insert-when > :more ())))
+  (is (= [0 1 :same 1 2 3 :same 5 8 13 :same 21]
+         (take 12 (->> [0 1]
+                       (iterate (fn [[a b]] [b (+ a b)]))
+                       (map first)      ; fibonacci numbers
+                       (insert-when (fn [a b]    ; both even or both odd
+                             (= (mod a 2) (mod b 2)))
+                           :same))))))
+

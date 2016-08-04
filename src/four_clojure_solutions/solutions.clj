@@ -281,3 +281,9 @@
                 nil
                 (lazy-seq (cons x (step new-num-matched more))))))]
     (step 0 xs)))
+
+(defn insert-when [p match-value [x y & more :as xs]]
+  (if (empty? xs) xs
+      (lazy-seq (concat
+                 (if (and y (p x y)) [x match-value] [x])
+                 (insert-when p match-value (rest xs))))))
