@@ -287,3 +287,29 @@
       (lazy-seq (concat
                  (if (and y (p x y)) [x match-value] [x])
                  (insert-when p match-value (rest xs))))))
+
+(defn roman-numerals [x]
+  (let [num-to-roman {1 "I", 5 "V", 10 "X", 50 "L", 100 "C", 500 "D", 1000 "M"}
+     place->roman (fn [[place z]] (let [one-symbol (num-to-roman place)
+                                        five-symbol (num-to-roman (* place 5))
+                                        ten-symbol (num-to-roman (* place 10))]
+                                    (case z
+                                      0 ""
+                                      1 one-symbol
+                                      2 (str one-symbol one-symbol)
+                                      3 (str one-symbol one-symbol one-symbol)
+                                      4 (str one-symbol five-symbol)
+                                      5 (str five-symbol)
+                                      6 (str five-symbol one-symbol)
+                                      7 (str five-symbol one-symbol one-symbol)
+                                      8 (str five-symbol one-symbol one-symbol one-symbol)
+                                      9 (str one-symbol ten-symbol))))]
+    (->> x
+         (iterate #(quot % 10))
+         (take-while (partial not= 0))
+         (map #(mod % 10))
+         (map-indexed (fn [i y] [(int (Math/pow 10 i)) y]))
+         (vec)
+         (rseq)
+         (map place->roman)
+         (apply str))))

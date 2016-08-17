@@ -39,5 +39,11 @@
                        (map first)      ; fibonacci numbers
                        (insert-when (fn [a b]    ; both even or both odd
                              (= (mod a 2) (mod b 2)))
-                           :same))))))
+                                    :same))))))
+
+(deftest roman-numerals-test
+  (is (= "I" (roman-numerals 1)))
+  (is (= "XXX" (roman-numerals 30)))
+  (is (= "IV" (roman-numerals 4)))
+  (is (= "MMMCMXCIX" (roman-numerals 3999))))
 
