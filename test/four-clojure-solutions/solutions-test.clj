@@ -47,3 +47,7 @@
   (is (= "IV" (roman-numerals 4)))
   (is (= "MMMCMXCIX" (roman-numerals 3999))))
 
+(deftest k-combinations-test
+  ;; (is (= (k-combinations 1 #{4 5 6}) #{#{4} #{5} #{6}}))
+  (is (= (k-combinations 3 #{0 1 2 3 4}) #{#{0 1 2} #{0 1 3} #{0 1 4} #{0 2 3} #{0 2 4}
+                                           #{0 3 4} #{1 2 3} #{1 2 4} #{1 3 4} #{2 3 4}})))
