@@ -317,21 +317,17 @@
 (defn k-combinations [subset-size xs]
   (let [xs-vec (vec xs)
         increment-index (fn [indexes]
-                          (if-let [index-to-inc
-                                   (first (ffirst (filter (fn [[[_ index1] [_ index2]]]
-                                                            (< index1 (- index2 1)))
-                                                          (partition 2 1 [[-1 -1]] indexes))))]
-                            (update-in (vec indexes) [index-to-inc 1] inc)
-                            (map-indexed vector
-                                         (conj
-                                          (vec (range (- (count indexes) 1)))
-                                          (inc (second (last indexes)))))))
+                          (let [[before-inc-index [index-to-inc & more]]
+                                (map (partial map first)
+                                     (split-with
+                                      (fn [[i1 i2]] (not (< i1 (dec i2))))
+                                      (partition 2 1 [(+ 2 (last indexes))] indexes)))]
+                            (concat (range (count before-inc-index))
+                                    [(inc index-to-inc)]
+                                    more)))
         k-combo-indexes (->> subset-size
                              range
-                             (map-indexed vector)
-                             vec
                              (iterate increment-index)
-                             (map (partial map second))
                              (take-while
                               (partial not-any? (partial <= (count xs)))))]
     (into #{} (map (fn [indexes] (into #{} (map (partial xs-vec) indexes))) k-combo-indexes))))
