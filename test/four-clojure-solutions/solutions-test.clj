@@ -53,3 +53,8 @@
   (is (= (k-combinations 2 #{[1 2 3] :a "abc" "efg"}) #{#{[1 2 3] :a} #{[1 2 3] "abc"} #{[1 2 3] "efg"} #{:a "abc"} #{:a "efg"} #{"abc" "efg"}}))
   (is (= (k-combinations 3 #{0 1 2 3 4}) #{#{0 1 2} #{0 1 3} #{0 1 4} #{0 2 3} #{0 2 4}
                                            #{0 3 4} #{1 2 3} #{1 2 4} #{1 3 4} #{2 3 4}})))
+
+(deftest prime-sandwich-test
+  (is (= false (prime-sandwich 4)))
+  (is (= true (prime-sandwich 563)))
+  (is (= 1103 (nth (filter prime-sandwich (range)) 15))))

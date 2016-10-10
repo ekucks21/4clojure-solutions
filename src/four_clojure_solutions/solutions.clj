@@ -331,3 +331,6 @@
                              (take-while
                               (partial not-any? (partial <= (count xs)))))]
     (into #{} (map (fn [indexes] (into #{} (map (partial xs-vec) indexes))) k-combo-indexes))))
+
+(defn prime-sandwich [n]
+  )
