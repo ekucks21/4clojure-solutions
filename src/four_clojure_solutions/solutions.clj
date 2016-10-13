@@ -333,4 +333,15 @@
     (into #{} (map (fn [indexes] (into #{} (map (partial xs-vec) indexes))) k-combo-indexes))))
 
 (defn prime-sandwich [n]
-  )
+  (let [primes (fn primes [x primes-found]
+                 (lazy-seq
+                  (if (not-any? (comp (partial = 0) (partial mod x)) primes-found)
+                    (cons x (primes (inc x) (conj primes-found x)))
+                    (primes (inc x) primes-found))))]
+    (if-let [[before _ after] (->> (primes 2 [])
+                                   (partition 3 1)
+                                   (take-while (comp (partial >= n) second))
+                                   (filter (comp (partial = n) second))
+                                   first)]
+      (if (= n (/ (+ before after) 2)) true false)
+      false)))
