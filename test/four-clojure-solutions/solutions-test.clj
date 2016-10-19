@@ -58,3 +58,8 @@
   (is (= false (prime-sandwich 4)))
   (is (= true (prime-sandwich 563)))
   (is (= 1103 (nth (filter prime-sandwich (range)) 15))))
+
+(deftest comp-engine-test
+  (is (= 2 ((comp-engine '(/ a b)) '{b 8 a 16})))
+  (is (= 8 ((comp-engine '(+ a b 2)) '{a 2 b 4})))
+  (is (= [6 0 -4] (map (comp-engine '(* (+ 2 a) (- 10 b))) '[{a 1 b 8} {b 5 a -2} {a 2 b 11}]))))

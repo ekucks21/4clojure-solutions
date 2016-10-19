@@ -1,6 +1,8 @@
 (ns four-clojure-solutions.solutions
-  (:require [clojure.set :as s]
-            [com.rpl.specter :refer [srange filterer transform]]))
+  (:require [clojure
+             [set :as s]
+             [walk :as c]]
+            [com.rpl.specter :refer [filterer srange transform]]))
 
 (defn infix [x & args]
   (reduce 
@@ -345,3 +347,7 @@
                                    first)]
       (if (= n (/ (+ before after) 2)) true false)
       false)))
+
+(defn comp-engine [f]
+  (let [symbols-in-map-f (c/postwalk #(if (symbol? %) '(get m %) %) f)]
+    symbols-in-map-f))
