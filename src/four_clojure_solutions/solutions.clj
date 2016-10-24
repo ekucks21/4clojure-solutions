@@ -349,5 +349,15 @@
       false)))
 
 (defn comp-engine [f]
-  (let [symbols-in-map-f (c/postwalk #(if (symbol? %) '(get m %) %) f)]
-    symbols-in-map-f))
+  (fn [m] ((fn compute [[f-sym & args]]
+             (let [resolved-f (condp = f-sym
+                                '/ /
+                                '+ +
+                                '- -
+                                '* *)
+                   resolved-args (map #(cond
+                                         (coll? %) (compute %)
+                                         (symbol? %) (% m)
+                                         :else %) args)]
+               (apply resolved-f resolved-args)))
+           f)))
