@@ -361,3 +361,25 @@
                                          :else %) args)]
                (apply resolved-f resolved-args)))
            f)))
+
+(defn sum-multiples-below [n a b]
+  (let [frobensius-num (- (* a b) (+ a b))
+        exp-combos (iterate (fn [[exp1 exp2]]
+                              (if (= exp1 exp2)
+                                [(inc exp1) 0]
+                                [exp1 (inc exp2)])) [0 0])
+        representables (->> exp-combos
+                            (map (fn [exps]
+                                   (map (fn [num exp]
+                                          (.pow (BigInteger. (str num)) exp))
+                                        [a b] exps)))
+                            (map (partial apply +)))
+        representable? (fn [x] (->> representables
+                                    (take-while (partial > x))
+                                    (some (partial = x))
+                                    some?))
+        num-representables-below-frobensius (->> frobensius-num
+                                                 (range (min a b))
+                                                 (filter representable?)
+                                                 count)]
+    (+ num-representables-below-frobensius (- n frobensius-num))))

@@ -62,5 +62,9 @@
 (deftest comp-engine-test
   (is (= 2 ((comp-engine '(/ a b)) '{b 8 a 16})))
   (is (= 8 ((comp-engine '(+ a b 2)) '{a 2 b 4})))
-  (is (= [6 0 -4] (map (comp-engine '(* (+ 2 a) (- 10 b))) '[{a 1 b 8} {b 5 a -2} {a 2 b 11}])))
-  )
+  (is (= [6 0 -4] (map (comp-engine '(* (+ 2 a) (- 10 b))) '[{a 1 b 8} {b 5 a -2} {a 2 b 11}]))))
+
+(deftest sum-multiples-below-test
+  ;; (is (= 0 (sum-multiples-below 3 17 11)))
+  ;; (is (= 23 (sum-multiples-below 10 3 5)))
+  (is (= "2333333316666668" (sum-multiples-below 100000000 3 5))))
