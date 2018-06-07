@@ -68,3 +68,9 @@
   ;; (is (= 0 (sum-multiples-below 3 17 11)))
   ;; (is (= 23 (sum-multiples-below 10 3 5)))
   (is (= "2333333316666668" (sum-multiples-below 100000000 3 5))))
+
+(deftest intervals-test
+  (is (= [[1 3]] (intervals [1 2 3])))
+  (is (= [[1 4] [6 6] [9 11] [13 17] [19 19]]
+         (intervals [19 4 17 1 3 10 2 13 13 2 16 4 2 15 13 9 6 14 2 11])))
+  (is (= [[1 3] [8 10]] (intervals [10 9 8 1 2 3]))))

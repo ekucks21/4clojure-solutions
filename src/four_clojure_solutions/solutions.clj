@@ -1,8 +1,11 @@
 (ns four-clojure-solutions.solutions
-  (:require [clojure
-             [set :as s]
-             [walk :as c]]
-            [com.rpl.specter :refer [filterer srange transform]]))
+  (:require
+   [clojure
+    [set :as s]
+    [walk :as c]]
+   [com.rpl.specter :refer [filterer srange transform]]))
+
+(use 'debux.core)
 
 (defn infix [x & args]
   (reduce 
@@ -386,3 +389,9 @@
                                                  (range (min a b))
                                                  (filter representable?))]
     (apply + (concat representables-below-frobensius (range (inc frobensius-num) n)))))
+
+(defn intervals [xs]
+  (map #(identity [(ffirst %) (last (last %))])
+       (filter (comp (partial < 1) count)
+               (partition-by (fn [[x1 x2]] (- x2 x1))
+                             (partition 2 1 (distinct (sort xs)))))))
