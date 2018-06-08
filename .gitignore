@@ -13,3 +13,4 @@ pom.xml.asc
 /LICENSE
 /README.md
 /bin/four_clojure_solutions
+*.iml
