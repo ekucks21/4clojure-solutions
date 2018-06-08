@@ -397,3 +397,14 @@
                                    (if (> interval 1) (conj %1 [%2]) (update-in %1 [(dec (count %1))] conj %2)))
                                 [[(first sorted-xs)]] (rest sorted-xs))]
         (map (fn [[x & more]] (if (nil? more) [x x] [x (last more)])) partitioned))))
+
+(defn big-divide [n a b]
+  (let [n-1 (dec n)
+        series (fn [interval x]
+                 (let [n-terms (quot x interval)
+                       last-dividend (* interval n-terms)]
+                   (* (/ n-terms 2) (+ interval last-dividend))))
+        a-series (series a n-1)
+        b-series (series b n-1)
+        lcm-series (series (* a b) n-1)]
+    (- (+ a-series b-series) lcm-series)))
