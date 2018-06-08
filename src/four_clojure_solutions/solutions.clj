@@ -3,9 +3,8 @@
    [clojure
     [set :as s]
     [walk :as c]]
-   [com.rpl.specter :refer [filterer srange transform]]))
-
-(use 'debux.core)
+   [com.rpl.specter :refer [filterer srange transform]]
+   ))
 
 (defn infix [x & args]
   (reduce 
@@ -391,7 +390,10 @@
     (apply + (concat representables-below-frobensius (range (inc frobensius-num) n)))))
 
 (defn intervals [xs]
-  (map #(identity [(ffirst %) (last (last %))])
-       (filter (comp (partial < 1) count)
-               (partition-by (fn [[x1 x2]] (- x2 x1))
-                             (partition 2 1 (distinct (sort xs)))))))
+  (if (empty? xs) []
+      (let [sorted-xs (distinct (sort xs))
+            partitioned (reduce #(let [last-number (last (last %1))
+                                       interval (- %2 last-number)]
+                                   (if (> interval 1) (conj %1 [%2]) (update-in %1 [(dec (count %1))] conj %2)))
+                                [[(first sorted-xs)]] (rest sorted-xs))]
+        (map (fn [[x & more]] (if (nil? more) [x x] [x (last more)])) partitioned))))
