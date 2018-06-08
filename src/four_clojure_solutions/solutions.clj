@@ -408,3 +408,6 @@
         b-series (series b n-1)
         lcm-series (series (* a b) n-1)]
     (- (+ a-series b-series) lcm-series)))
+
+(defn brackets-balanced? [s]
+  )

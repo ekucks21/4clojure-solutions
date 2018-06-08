@@ -77,3 +77,12 @@
 
 (deftest big-divide-test
   (is (= 23 (big-divide 10 3 5))))
+
+(deftest brackets-balanced-test
+  (is (= true (brackets-balanced? "This string has no brackets.")))
+  (is (= true (brackets-balanced? "class Test {
+      public static void main(String[] args) {
+        System.out.println(\"Hello world.\");
+      }
+    }")))
+  (is (= false (brackets-balanced? "(start, end]"))))
