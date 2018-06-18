@@ -410,4 +410,20 @@
     (- (+ a-series b-series) lcm-series)))
 
 (defn brackets-balanced? [s]
-  )
+  (let [is-opener? #(re-matches #"[\[\{\(]" (str %1))
+        is-closer? #(re-matches #"[\]\}\)]" (str %1))
+        get-matching-bracket #(case %1
+                                \[ \]
+                                \] \[
+                                \{ \}
+                                \} \{
+                                \( \)
+                                \) \(
+                                nil)]
+    (empty? (reduce #(cond
+                      (is-opener? %2) (conj %1 %2)
+                      (is-closer? %2) (if (= (last %1) (get-matching-bracket %2))
+                                        (into [] (butlast %1))
+                                        (conj %1 %2))
+                      :else %1)
+                   [] s))))
