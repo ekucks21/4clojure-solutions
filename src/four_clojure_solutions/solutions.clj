@@ -427,3 +427,6 @@
                                         (conj %1 %2))
                       :else %1)
                    [] s))))
+
+(defn equivalent-subset-sum? [int-sets]
+  (let [sums #()]))
