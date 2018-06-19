@@ -86,3 +86,15 @@
       }
     }")))
   (is (= false (brackets-balanced? "(start, end]"))))
+
+(deftest equivalent-subset-sum-test
+  (is (= true (equivalent-subset-sum? #{-1 1 99} 
+                                      #{-2 2 888}
+                                      #{-3 3 7777})))
+  (is (= false (equivalent-subset-sum? #{1}
+                                       #{2}
+                                       #{3}
+                                       #{4})))
+  (is (= false (equivalent-subset-sum? #{1 -3 51 9} 
+                                       #{0}
+                                       #{9 2 81 33}))))

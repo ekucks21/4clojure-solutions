@@ -428,5 +428,28 @@
                       :else %1)
                    [] s))))
 
-(defn equivalent-subset-sum? [int-sets]
-  (let [sums #()]))
+(defn equivalent-subset-sum? [& int-sets]
+  (let [convert-to-binary (fn [x]
+                            (if (zero? x)
+                              [0]
+                              (->> x
+                                   (iterate #(quot % 2))
+                                   (take-while (complement zero?))
+                                   (mapv #(mod % 2))
+                                   rseq)))
+        num-sub-sets (fn [set-size]
+                       (dec (reduce * (repeat set-size 2))))
+        set-sums (let [sums (fn [int-set]
+                              (let [subset-masks
+                                    (map convert-to-binary
+                                         (range 1 (inc (num-sub-sets (count int-set)))))]
+                                (map
+                                 (fn [subset-mask]
+                                   (->> subset-mask
+                                        (map vector int-set)
+                                        (filter #(= 1 (second %1)))
+                                        (map first)
+                                        (reduce +)))
+                                 subset-masks)))]
+                   (map sums int-sets))]
+    (not (empty? (apply clojure.set/intersection (map set set-sums))))))
