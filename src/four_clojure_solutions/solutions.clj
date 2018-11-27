@@ -1,16 +1,16 @@
 (ns four-clojure-solutions.solutions
   (:require
-   [clojure
-    [set :as s]
-    [walk :as c]]
-   [com.rpl.specter :refer [filterer srange transform]]
-   ))
+    [clojure
+     [set :as s]
+     [walk :as c]]
+    [com.rpl.specter :refer [filterer srange transform]]))
+
 
 (defn infix [x & args]
-  (reduce 
-    (fn [operand1 [operator operand2]] 
-      (operator operand1 operand2)) 
-    (partition 2 args))) 
+  (reduce
+    (fn [operand1 [operator operand2]]
+      (operator operand1 operand2))
+    (partition 2 args)))
 
 ; re-implement iterate
 
@@ -20,11 +20,11 @@
 ; group a sequence
 
 (defn my-group-by [f s]
-  (letfn [(get-singleton-maps [f s] 
-                              (for [[k v] (partition 2 (interleave (map f s) s))]
-                                {k [v]}))]
+  (letfn [(get-singleton-maps [f s]
+            (for [[k v] (partition 2 (interleave (map f s) s))]
+              {k [v]}))]
     (apply merge-with (cons into (get-singleton-maps f s)))))
-                                        ;
+;
 ;; pascal's triangle
 
 (defn tree-to-table [amap]
@@ -34,9 +34,9 @@
 
 (defn insert [n alon]
   (cond
-       (empty? alon) (cons n nil)
-       (<= n (first alon)) (cons n alon)
-       (> n (first alon)) (cons (first alon) (insert n (rest alon)))))
+    (empty? alon) (cons n nil)
+    (<= n (first alon)) (cons n alon)
+    (> n (first alon)) (cons (first alon) (insert n (rest alon)))))
 
 (defn isort [alon]
   (loop [coll alon]
@@ -74,9 +74,9 @@
 
 (defn isort [alon]
   (loop [alon (seq (reverse alon)), sorted nil]
-      (if alon
-            (recur (next alon) (insert (first alon) sorted))
-            sorted)))
+    (if alon
+      (recur (next alon) (insert (first alon) sorted))
+      sorted)))
 
 (defn bad-insert-sort [coll]
   (loop [sortedIndex 0 beingSorted coll]
@@ -90,23 +90,23 @@
 
 (defn get-pascal-row [row]
   (letfn [(calculate-row [prevRow]
-                         (flatten [1 
-                                   (map (fn [[x y]] (+ x y)) (partition 2 1 prevRow)) 
-                                   1]))]
-    (nth (iterate calculate-row [1]) (dec row)))) 
+            (flatten [1
+                      (map (fn [[x y]] (+ x y)) (partition 2 1 prevRow))
+                      1]))]
+    (nth (iterate calculate-row [1]) (dec row))))
 
 (defn disjoint? [sets]
-  (= (apply + (map count sets)) 
-     (count (reduce clojure.set/union sets)))
-  ) 
+  (= (apply + (map count sets))
+     (count (reduce clojure.set/union sets))))
 
-(defn symmetric-tree? [tree] 
-  (letfn [(reverse-tree [[parent left right]] 
-    [parent
-     (if (coll? right) (reverse-tree right) right)
-		 (if (coll? left) (reverse-tree left) left)])]
-     (= (second tree)
-        (reverse-tree (nth tree 2)))))
+
+(defn symmetric-tree? [tree]
+  (letfn [(reverse-tree [[parent left right]]
+            [parent
+             (if (coll? right) (reverse-tree right) right)
+             (if (coll? left) (reverse-tree left) left)])]
+    (= (second tree)
+       (reverse-tree (nth tree 2)))))
 
 (defn count-nodes [tree]
   (letfn [(count-children [tree] (let [child-count (map #(if (coll? %) (count-children %) 0) tree)
@@ -179,8 +179,8 @@
                                                [even-reverse (even-odd false)])
                             remainder (take-last (- (count larger) (count smaller)) larger)
                             interleaved (if (even? (first sub-range))
-                                         (interleave even-reverse (even-odd false))
-                                         (interleave (even-odd false) even-reverse))]
+                                          (interleave even-reverse (even-odd false))
+                                          (interleave (even-odd false) even-reverse))]
                         (concat interleaved remainder))]
     (vec (concat head new-sub-range tail))))
 
@@ -288,26 +288,26 @@
 
 (defn insert-when [p match-value [x y & more :as xs]]
   (if (empty? xs) xs
-      (lazy-seq (concat
-                 (if (and y (p x y)) [x match-value] [x])
-                 (insert-when p match-value (rest xs))))))
+                  (lazy-seq (concat
+                              (if (and y (p x y)) [x match-value] [x])
+                              (insert-when p match-value (rest xs))))))
 
 (defn roman-numerals [x]
   (let [num-to-roman {1 "I", 5 "V", 10 "X", 50 "L", 100 "C", 500 "D", 1000 "M"}
-     place->roman (fn [[place z]] (let [one-symbol (num-to-roman place)
-                                        five-symbol (num-to-roman (* place 5))
-                                        ten-symbol (num-to-roman (* place 10))]
-                                    (case z
-                                      0 ""
-                                      1 one-symbol
-                                      2 (str one-symbol one-symbol)
-                                      3 (str one-symbol one-symbol one-symbol)
-                                      4 (str one-symbol five-symbol)
-                                      5 (str five-symbol)
-                                      6 (str five-symbol one-symbol)
-                                      7 (str five-symbol one-symbol one-symbol)
-                                      8 (str five-symbol one-symbol one-symbol one-symbol)
-                                      9 (str one-symbol ten-symbol))))]
+        place->roman (fn [[place z]] (let [one-symbol (num-to-roman place)
+                                           five-symbol (num-to-roman (* place 5))
+                                           ten-symbol (num-to-roman (* place 10))]
+                                       (case z
+                                         0 ""
+                                         1 one-symbol
+                                         2 (str one-symbol one-symbol)
+                                         3 (str one-symbol one-symbol one-symbol)
+                                         4 (str one-symbol five-symbol)
+                                         5 (str five-symbol)
+                                         6 (str five-symbol one-symbol)
+                                         7 (str five-symbol one-symbol one-symbol)
+                                         8 (str five-symbol one-symbol one-symbol one-symbol)
+                                         9 (str one-symbol ten-symbol))))]
     (->> x
          (iterate #(quot % 10))
          (take-while (partial not= 0))
@@ -324,8 +324,8 @@
                           (let [[before-inc-index [index-to-inc & more]]
                                 (map (partial map first)
                                      (split-with
-                                      (fn [[i1 i2]] (not (< i1 (dec i2))))
-                                      (partition 2 1 [(+ 2 (last indexes))] indexes)))]
+                                       (fn [[i1 i2]] (not (< i1 (dec i2))))
+                                       (partition 2 1 [(+ 2 (last indexes))] indexes)))]
                             (concat (range (count before-inc-index))
                                     [(inc index-to-inc)]
                                     more)))
@@ -333,15 +333,15 @@
                              range
                              (iterate increment-index)
                              (take-while
-                              (partial not-any? (partial <= (count xs)))))]
+                               (partial not-any? (partial <= (count xs)))))]
     (into #{} (map (fn [indexes] (into #{} (map (partial xs-vec) indexes))) k-combo-indexes))))
 
 (defn prime-sandwich [n]
   (let [primes (fn primes [x primes-found]
                  (lazy-seq
-                  (if (not-any? (comp (partial = 0) (partial mod x)) primes-found)
-                    (cons x (primes (inc x) (conj primes-found x)))
-                    (primes (inc x) primes-found))))]
+                   (if (not-any? (comp (partial = 0) (partial mod x)) primes-found)
+                     (cons x (primes (inc x) (conj primes-found x)))
+                     (primes (inc x) primes-found))))]
     (if-let [[before _ after] (->> (primes 2 [])
                                    (partition 3 1)
                                    (take-while (comp (partial >= n) second))
@@ -361,8 +361,7 @@
                                          (coll? %) (compute %)
                                          (symbol? %) (% m)
                                          :else %) args)]
-               (apply resolved-f resolved-args)))
-           f)))
+               (apply resolved-f resolved-args))) f)))
 
 (defn sum-multiples-below [n a b]
   (let [frobensius-num (- (* a b) (+ a b))
@@ -385,18 +384,18 @@
                                     (some (partial = x))
                                     some?))
         representables-below-frobensius (->> frobensius-num
-                                                 (range (min a b))
-                                                 (filter representable?))]
+                                             (range (min a b))
+                                             (filter representable?))]
     (apply + (concat representables-below-frobensius (range (inc frobensius-num) n)))))
 
 (defn intervals [xs]
   (if (empty? xs) []
-      (let [sorted-xs (distinct (sort xs))
-            partitioned (reduce #(let [last-number (last (last %1))
-                                       interval (- %2 last-number)]
-                                   (if (> interval 1) (conj %1 [%2]) (update-in %1 [(dec (count %1))] conj %2)))
-                                [[(first sorted-xs)]] (rest sorted-xs))]
-        (map (fn [[x & more]] (if (nil? more) [x x] [x (last more)])) partitioned))))
+                  (let [sorted-xs (distinct (sort xs))
+                        partitioned (reduce #(let [last-number (last (last %1))
+                                                   interval (- %2 last-number)]
+                                               (if (> interval 1) (conj %1 [%2]) (update-in %1 [(dec (count %1))] conj %2)))
+                                            [[(first sorted-xs)]] (rest sorted-xs))]
+                    (map (fn [[x & more]] (if (nil? more) [x x] [x (last more)])) partitioned))))
 
 (defn big-divide [n a b]
   (let [n-1 (dec n)
@@ -421,12 +420,12 @@
                                 \) \(
                                 nil)]
     (empty? (reduce #(cond
-                      (is-opener? %2) (conj %1 %2)
-                      (is-closer? %2) (if (= (last %1) (get-matching-bracket %2))
-                                        (into [] (butlast %1))
-                                        (conj %1 %2))
-                      :else %1)
-                   [] s))))
+                       (is-opener? %2) (conj %1 %2)
+                       (is-closer? %2) (if (= (last %1) (get-matching-bracket %2))
+                                         (into [] (butlast %1))
+                                         (conj %1 %2))
+                       :else %1)
+                    [] s))))
 
 (defn equivalent-subset-sum? [& int-sets]
   (let [convert-to-binary (fn [x]
@@ -444,12 +443,12 @@
                                     (map convert-to-binary
                                          (range 1 (inc (num-sub-sets (count int-set)))))]
                                 (map
-                                 (fn [subset-mask]
-                                   (->> subset-mask
-                                        (map vector int-set)
-                                        (filter #(= 1 (second %1)))
-                                        (map first)
-                                        (reduce +)))
-                                 subset-masks)))]
+                                  (fn [subset-mask]
+                                    (->> subset-mask
+                                         (map vector int-set)
+                                         (filter #(= 1 (second %1)))
+                                         (map first)
+                                         (reduce +)))
+                                  subset-masks)))]
                    (map sums int-sets))]
     (not (empty? (apply clojure.set/intersection (map set set-sums))))))
