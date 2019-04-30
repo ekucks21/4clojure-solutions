@@ -453,3 +453,17 @@
                                  subset-masks)))]
                    (map sums int-sets))]
     (not (empty? (apply clojure.set/intersection (map set set-sums))))))
+
+(defn sequs-horribilis 
+  ([x xs] (second (sequs-horribilis x xs 0)))
+  ([x xs sum]
+   (let [[new-sum sum-seq] (reduce (fn [[r-sum sum-seq :as result] n]
+                                     (if (coll? n)
+                                       (let [[sub-seq-sum sub-seq] (sequs-horribilis x n r-sum)]
+                                         [sub-seq-sum (cons sub-seq sum-seq)])
+                                       (let [n-sum (+ n r-sum)]
+                                         (if (> n-sum x)
+                                           (reduced result)
+                                           [n-sum (cons n sum-seq)]))))
+                                   [sum '()] xs)]
+     [new-sum (reverse sum-seq)])))
