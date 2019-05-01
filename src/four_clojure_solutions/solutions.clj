@@ -475,3 +475,32 @@
                           flatten
                           (apply hash-map))]
       (last (sort-by (juxt (comp suit-order :suit) :rank) cards)))))
+
+(defn panlindromes [start]
+  (let [num->digits (fn [x]
+                      (->> x
+                           (iterate (comp (juxt #(quot % 10) #(mod % 10)) first))
+                           rest
+                           (take-while (partial some (partial < 0)))
+                           (map second)))
+        digits->num #(->> %
+                          reverse
+                          (map * (iterate (partial * 10) 1))
+                          (apply +))
+        palindrome? #(let [digits (num->digits %)
+                           [left right] (split-at (quot (count digits) 2) digits)]
+                       (= left (reverse right)))
+        palindrome-seq (rest (iterate
+                              (fn [x]
+                                (let [digits (num->digits x)
+                                      digits-count (count digits)
+                                      left-mirror (take (if (odd? digits-count)
+                                                          (inc (quot digits-count 2))
+                                                          (quot digits-count 2)) digits)
+                                      inc-fragment (vec (drop-while (partial = 9) (reverse left-mirror)))
+                                      inc-left-mirror (if (not (empty? inc-fragment))
+                                                        (reverse (take (count left-mirror) (concat (update inc-fragment 0 inc) (repeat 0))))
+                                                        (into [1] (repeat (count left-mirror))))]
+                                  (digits->num inc-left-mirror)))
+                              start))]
+    (if (palindrome? start) (conj palindrome-seq start) palindrome-seq)))
