@@ -466,3 +466,8 @@
         rest
         (take-while (comp (partial >= x) first))
         ((juxt (comp first last) (partial map second))))))
+
+(defn trick-winner [trump]
+  (fn [cards]
+    (let [suit-order (apply hash-map (flatten (map-indexed (comp reverse vector) (distinct [(:suit (first cards)) trump]))))]
+      (last (sort-by (juxt (comp suit-order :suit) :rank) cards)))))

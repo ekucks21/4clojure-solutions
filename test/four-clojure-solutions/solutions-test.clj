@@ -104,3 +104,13 @@
          (sequs-horribilis 10 [1 2 [3 [4 5] 6] 7])))
   (is (= '(0 1 2 3)
          (sequs-horribilis 9 (range)))))
+
+(deftest trick-winner-test
+  (is (= {:suit :club :rank 9}
+         ((trick-winner nil) [{:suit :club :rank 4}
+                              {:suit :club :rank 9}])))
+  (is (= {:suit :club :rank 10} ((trick-winner :club) [{:suit :spade :rank 2}
+                                                       {:suit :club :rank 10}])))
+  (is (= {:suit :heart :rank 8}
+         ((trick-winner :heart) [{:suit :heart :rank 6} {:suit :heart :rank 8}
+                                 {:suit :diamond :rank 10} {:suit :heart :rank 4}]))))
