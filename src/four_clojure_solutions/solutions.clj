@@ -469,5 +469,9 @@
 
 (defn trick-winner [trump]
   (fn [cards]
-    (let [suit-order (apply hash-map (flatten (map-indexed (comp reverse vector) (distinct [(:suit (first cards)) trump]))))]
+    (let [suit-order (->> [(:suit (first cards)) trump]
+                          distinct
+                          (map-indexed (comp reverse vector))
+                          flatten
+                          (apply hash-map))]
       (last (sort-by (juxt (comp suit-order :suit) :rank) cards)))))
