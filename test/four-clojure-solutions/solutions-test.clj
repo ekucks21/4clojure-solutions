@@ -98,3 +98,9 @@
   (is (= false (equivalent-subset-sum? #{1 -3 51 9} 
                                        #{0}
                                        #{9 2 81 33}))))
+
+(deftest sequs-horribilis-test
+  (is (= '(1 2 (3 (4)))
+         (sequs-horribilis 10 [1 2 [3 [4 5] 6] 7])))
+  (is (= '(0 1 2 3)
+         (sequs-horribilis 9 (range)))))
