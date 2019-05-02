@@ -476,31 +476,60 @@
                           (apply hash-map))]
       (last (sort-by (juxt (comp suit-order :suit) :rank) cards)))))
 
-(defn panlindromes [start]
+(defn palindromes [start]
   (let [num->digits (fn [x]
-                      (->> x
-                           (iterate (comp (juxt #(quot % 10) #(mod % 10)) first))
-                           rest
-                           (take-while (partial some (partial < 0)))
-                           (map second)))
+                      (if (= x 0)
+                        '(0)
+                        (->> x
+                             vector
+                             (iterate (comp (juxt #(quot % 10) #(mod % 10)) first))
+                             rest
+                             (take-while (partial some (partial < 0)))
+                             (map second)
+                             reverse)))
         digits->num #(->> %
                           reverse
                           (map * (iterate (partial * 10) 1))
                           (apply +))
         palindrome? #(let [digits (num->digits %)
-                           [left right] (split-at (quot (count digits) 2) digits)]
-                       (= left (reverse right)))
-        palindrome-seq (rest (iterate
-                              (fn [x]
-                                (let [digits (num->digits x)
-                                      digits-count (count digits)
-                                      left-mirror (take (if (odd? digits-count)
-                                                          (inc (quot digits-count 2))
-                                                          (quot digits-count 2)) digits)
-                                      inc-fragment (vec (drop-while (partial = 9) (reverse left-mirror)))
-                                      inc-left-mirror (if (not (empty? inc-fragment))
-                                                        (reverse (take (count left-mirror) (concat (update inc-fragment 0 inc) (repeat 0))))
-                                                        (into [1] (repeat (count left-mirror))))]
-                                  (digits->num inc-left-mirror)))
-                              start))]
-    (if (palindrome? start) (conj palindrome-seq start) palindrome-seq)))
+                           mirror-size (quot (count digits) 2)
+                           left (take mirror-size digits)
+                           rev-right (take mirror-size (reverse digits))]
+                       (or (= left rev-right) (= 1 (count digits))))
+        palindrome-seq (rest
+                        (iterate
+                         (fn [x]
+                           (let [digits (num->digits x)
+                                 digits-count (count digits)
+                                 left-size (if (odd? digits-count)
+                                             (inc (quot digits-count 2))
+                                             (quot digits-count 2))
+                                 [left-mirror right-mirror] (split-at left-size digits)
+                                 inc-fragment (vec (drop-while (partial = 9) (reverse left-mirror)))
+                                 inc-left-mirror (if (not (empty? inc-fragment))
+                                                   (take (count left-mirror)
+                                                         (concat
+                                                          (reverse
+                                                           (assoc inc-fragment 0
+                                                                  (inc (first inc-fragment))))
+                                                          (repeat 0))))
+                                 palindrome-digits (if (and (even? digits-count)
+                                                            (< (digits->num (reverse right-mirror))
+                                                               (digits->num left-mirror)))
+                                                     (concat left-mirror (reverse left-mirror))
+                                                     (if (not (empty? inc-fragment))
+                                                       (if (= 1 digits-count)
+                                                         inc-left-mirror
+                                                         (concat inc-left-mirror
+                                                                 (reverse
+                                                                  (take (quot digits-count 2)
+                                                                        inc-left-mirror))))
+                                                       (concat [1] (repeat (- digits-count 1) 0) [1])))
+                                 palindrome-num (digits->num palindrome-digits)]
+                             (do (println "palindrome-num: " palindrome-num)
+                                 (println "left-mirror: " left-mirror)
+                                 (println "inc-fragment: " inc-fragment)
+                                 (println "inc-left-mirror: " inc-left-mirror)
+                                 palindrome-num)))
+                         start))]
+        (if (palindrome? start) (conj palindrome-seq start) palindrome-seq)))

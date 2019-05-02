@@ -114,3 +114,19 @@
   (is (= {:suit :heart :rank 8}
          ((trick-winner :heart) [{:suit :heart :rank 6} {:suit :heart :rank 8}
                                  {:suit :diamond :rank 10} {:suit :heart :rank 4}]))))
+
+(deftest palindromes-test
+  (is (= [0 1 2 3 4 5 6 7 8 9 
+          11 22 33 44 55 66 77 88 99 
+          101 111 121 131 141 151 161]
+         (take 26 (palindromes 0))))
+  (is (= [171 181 191 202 
+          212 222 232 242 
+          252 262 272 282 
+          292 303 313 323]
+         (take 16 (palindromes 162))))
+  (is (= [1234554321 1234664321 1234774321 
+          1234884321 1234994321 1235005321]
+         (take 6 (palindromes 1234550000))))
+  (is (= (* 111111111 111111111)
+         (first (palindromes (* 111111111 111111111))))))
