@@ -533,3 +533,10 @@
                                  palindrome-num)))
                          start))]
         (if (palindrome? start) (conj palindrome-seq start) palindrome-seq)))
+
+(defn infinite-matrix
+  ([f] (infinite-matrix f 0 0))
+  ([f m n] (let [columns (fn columns [column]
+                           (lazy-seq (cons (f m (+ n column)) (columns (inc column)))))]
+             (lazy-seq (cons (columns 0) (infinite-matrix f (inc m) n)))))
+  ([f m n s t] (map (partial take t) (take s (infinite-matrix f m n)))))
