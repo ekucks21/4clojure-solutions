@@ -151,3 +151,6 @@
           [30 36 42 48 54 60 66]
           [35 42 49 56 63 70 77]]
          (infinite-matrix * 3 5 5 7))))
+
+(deftest par-combos-test
+  (is (= [#{""} #{"()"} #{"()()" "(())"}] (map (fn [n] (par-combos n)) [0 1 2]))))

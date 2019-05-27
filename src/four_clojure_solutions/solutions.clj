@@ -540,3 +540,7 @@
                            (lazy-seq (cons (f m (+ n column)) (columns (inc column)))))]
              (lazy-seq (cons (columns 0) (infinite-matrix f (inc m) n)))))
   ([f m n s t] (map (partial take t) (take s (infinite-matrix f m n)))))
+
+(defn par-combos
+  ([n] (par-combos n [[] [] []]))
+  ([n combo] (let [[] ()])))
