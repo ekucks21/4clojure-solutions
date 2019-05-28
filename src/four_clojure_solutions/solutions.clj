@@ -453,7 +453,7 @@
                    (map sums int-sets))]
     (not (empty? (apply clojure.set/intersection (map set set-sums))))))
 
-(defn sequs-horribilis 
+(defn sequs-horribilis
   ([x xs] (second (sequs-horribilis x xs 0)))
   ([x xs sum]
    (->> xs
@@ -531,8 +531,8 @@
                                  (println "inc-fragment: " inc-fragment)
                                  (println "inc-left-mirror: " inc-left-mirror)
                                  palindrome-num)))
-                         start))]
-        (if (palindrome? start) (conj palindrome-seq start) palindrome-seq)))
+                         start))
+        (if (palindrome? start) (conj palindrome-seq start) palindrome-seq)]))
 
 (defn infinite-matrix
   ([f] (infinite-matrix f 0 0))
@@ -541,6 +541,14 @@
              (lazy-seq (cons (columns 0) (infinite-matrix f (inc m) n)))))
   ([f m n s t] (map (partial take t) (take s (infinite-matrix f m n)))))
 
-(defn par-combos
-  ([n] (par-combos n [[] [] []]))
-  ([n combo] (let [[] ()])))
+(defn par-combos [n]
+  (take-while
+    (comp (partial = (count n)) first rseq)
+    (iterate
+      (fn [par-depths]
+        (let [[depths-to-reset depths-to-keep] (map
+                                                 (comp reverse (partial map first))
+                                                 (split-with (partial apply >) (partition 2 1 (rseq par-depths))))]
+          (into [] (concat (update depths-to-keep (dec (count depths-to-keep)) inc)) (repeat (n)))))
+
+      (into [] (repeat n 1)))))
