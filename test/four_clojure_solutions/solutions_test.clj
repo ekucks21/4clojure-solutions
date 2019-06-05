@@ -1,4 +1,4 @@
-(ns four-clojure-solutions.solutions-test
+(ns four-clojure-solutions.solutions_test
   (:use  [clojure.test])
   (:use  [four-clojure-solutions.solutions]))
 
@@ -153,4 +153,5 @@
          (infinite-matrix * 3 5 5 7))))
 
 (deftest par-combos-test
+  (is (= (nth (sort (par-combos 12)) 5000) "(((((()()()()()))))(()))"))
   (is (= [#{""} #{"()"} #{"()()" "(())"}] (map (fn [n] (par-combos n)) [0 1 2]))))

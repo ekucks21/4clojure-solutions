@@ -3,7 +3,8 @@
     [clojure
      [set :as s]
      [walk :as c]]
-    [com.rpl.specter :refer [filterer srange transform]]))
+    [com.rpl.specter :refer [filterer srange transform]]
+    [clojure.string :as str]))
 
 
 (defn infix [x & args]
@@ -542,23 +543,35 @@
   ([f m n s t] (map (partial take t) (take s (infinite-matrix f m n)))))
 
 (defn par-combos [n]
-  (let [next-par-combo
-        (fn [par-depths]
-          (let [[depths-to-reset depths-to-keep]
-                (map
-                 (comp (partial keep identity)
-                       reverse
-                       (partial apply conj)
-                       (juxt (partial map second) ffirst))
-                 (split-with (partial apply >) (partition 2 1 (rseq par-depths))))
-                inc-par-depth (if (empty? depths-to-keep) [] [(inc (last depths-to-keep))])]
-            (into [] (concat
-                      (butlast depths-to-keep)
-                      inc-par-depth
-                      (repeat (dec (count depths-to-reset)) 1)))))
-        par-depths->pars (fn [par-depths]
-                           )]
-    (into #{}
-          (take-while
-           (comp (partial = n) count)
-           (iterate next-par-combo (into [] (repeat n 1)))))))
+  (if (= n 0)
+    #{""}
+    (let [next-par-combo
+          (fn [par-depths]
+            (let [[depths-to-reset depths-to-keep]
+                  (map
+                    (comp (partial keep identity)
+                          reverse
+                          (partial apply conj)
+                          (juxt (partial map second) ffirst))
+                    (split-with (partial apply >) (partition 2 1 (rseq par-depths))))
+                  inc-par-depth (if (empty? depths-to-keep) [] [(inc (last depths-to-keep))])]
+              (into [] (concat
+                         (butlast depths-to-keep)
+                         inc-par-depth
+                         (repeat (dec (count depths-to-reset)) 1)))))
+          par-depths->pars (fn [par-depths]
+                             (let [bracket-combo
+                                   (clojure.string/join ""
+                                             (first
+                                               (reduce (fn [par-combo par-depth]
+                                                         (update-in par-combo (repeat par-depth 0) (partial into [[]])))
+                                                       [[]] par-depths)))]
+                               (-> bracket-combo
+                                   (clojure.string/replace #" " "")
+                                   (clojure.string/replace #"\Q]\E" ")")
+                                   (clojure.string/replace #"\Q[\E" "("))))]
+      (into #{}
+            (map par-depths->pars
+                 (take-while
+                   (comp (partial = n) count)
+                   (iterate next-par-combo (into [] (repeat n 1)))))))))
