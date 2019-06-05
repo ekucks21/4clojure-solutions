@@ -531,8 +531,8 @@
                                  (println "inc-fragment: " inc-fragment)
                                  (println "inc-left-mirror: " inc-left-mirror)
                                  palindrome-num)))
-                         start))
-        (if (palindrome? start) (conj palindrome-seq start) palindrome-seq)]))
+                         start))]
+    (if (palindrome? start) (conj palindrome-seq start) palindrome-seq)))
 
 (defn infinite-matrix
   ([f] (infinite-matrix f 0 0))
@@ -542,13 +542,23 @@
   ([f m n s t] (map (partial take t) (take s (infinite-matrix f m n)))))
 
 (defn par-combos [n]
-  (take-while
-    (comp (partial = (count n)) first rseq)
-    (iterate
-      (fn [par-depths]
-        (let [[depths-to-reset depths-to-keep] (map
-                                                 (comp reverse (partial map first))
-                                                 (split-with (partial apply >) (partition 2 1 (rseq par-depths))))]
-          (into [] (concat (update depths-to-keep (dec (count depths-to-keep)) inc)) (repeat (n)))))
-
-      (into [] (repeat n 1)))))
+  (let [next-par-combo
+        (fn [par-depths]
+          (let [[depths-to-reset depths-to-keep]
+                (map
+                 (comp (partial keep identity)
+                       reverse
+                       (partial apply conj)
+                       (juxt (partial map second) ffirst))
+                 (split-with (partial apply >) (partition 2 1 (rseq par-depths))))
+                inc-par-depth (if (empty? depths-to-keep) [] [(inc (last depths-to-keep))])]
+            (into [] (concat
+                      (butlast depths-to-keep)
+                      inc-par-depth
+                      (repeat (dec (count depths-to-reset)) 1)))))
+        par-depths->pars (fn [par-depths]
+                           )]
+    (into #{}
+          (take-while
+           (comp (partial = n) count)
+           (iterate next-par-combo (into [] (repeat n 1)))))))
