@@ -542,36 +542,23 @@
              (lazy-seq (cons (columns 0) (infinite-matrix f (inc m) n)))))
   ([f m n s t] (map (partial take t) (take s (infinite-matrix f m n)))))
 
-(defn par-combos [n]
-  (if (= n 0)
-    #{""}
-    (let [next-par-combo
-          (fn [par-depths]
-            (let [[depths-to-reset depths-to-keep]
-                  (map
-                    (comp (partial keep identity)
-                          reverse
-                          (partial apply conj)
-                          (juxt (partial map second) ffirst))
-                    (split-with (partial apply >) (partition 2 1 (rseq par-depths))))
-                  inc-par-depth (if (empty? depths-to-keep) [] [(inc (last depths-to-keep))])]
-              (into [] (concat
-                         (butlast depths-to-keep)
-                         inc-par-depth
-                         (repeat (dec (count depths-to-reset)) 1)))))
-          par-depths->pars (fn [par-depths]
-                             (let [bracket-combo
-                                   (clojure.string/join ""
-                                             (first
-                                               (reduce (fn [par-combo par-depth]
-                                                         (update-in par-combo (repeat par-depth 0) (partial into [[]])))
-                                                       [[]] par-depths)))]
-                               (-> bracket-combo
-                                   (clojure.string/replace #" " "")
-                                   (clojure.string/replace #"\Q]\E" ")")
-                                   (clojure.string/replace #"\Q[\E" "("))))]
-      (into #{}
-            (map par-depths->pars
-                 (take-while
-                   (comp (partial = n) count)
-                   (iterate next-par-combo (into [] (repeat n 1)))))))))
+(defn par-combos 
+  ([n] (par-combos n n "" #{}))
+  ([left-pars right-pars par-combo par-combo-set]
+   (if (= 0 left-pars right-pars)
+     (conj par-combo-set par-combo)
+     (-> par-combo-set
+         (#(if (> right-pars left-pars)
+             (into % (par-combos
+                      left-pars
+                      (dec right-pars)
+                      (str par-combo ")")
+                      par-combo-set))
+             %))
+         (#(if (> left-pars 0)
+             (into % (par-combos
+                      (dec left-pars)
+                      right-pars
+                      (str par-combo "(")
+                      par-combo-set))
+             %))))))
