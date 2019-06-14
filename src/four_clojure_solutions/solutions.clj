@@ -562,3 +562,29 @@
                       (str par-combo "(")
                       par-combo-set))
              %))))))
+
+(defn all-paren [n]
+  (do
+    (println "all-paren: " n)
+    (if (== n 0) #{""}
+        (into #{} (for [i (range n) j (all-paren i) k (all-paren (- n 1 i))]
+                    (do
+                      (println (str "i: " i " j: " j " k: " k " result: "
+                                    (str "(" j ")" k)))
+                      (str "(" j ")" k)))))))
+
+(defn longest-consecutive-sub-seq [xs]
+  (->> xs
+       (partition 2 1)
+       (partition-by (comp #(if (= % -1) true (gensym)) (partial apply -)))
+       (sort-by count)
+       reverse
+       (partition-by count)
+       (filter (comp (partial apply <) ffirst))
+       first
+       last
+       ((juxt ffirst (partial map second)))
+       flatten
+       ((comp #(if (nil? (first %)) [] %)))))
+
+

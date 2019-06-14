@@ -155,3 +155,8 @@
 (deftest par-combos-test
   (is (= (nth (sort (par-combos 12)) 5000) "(((((()()()()()))))(()))"))
   (is (= [#{""} #{"()"} #{"()()" "(())"}] (map (fn [n] (par-combos n)) [0 1 2]))))
+
+(deftest longest-consecutive-sub-seq-test
+  (is (= [0 1 2 3] (longest-consecutive-sub-seq [1 0 1 2 3 0 4 5])))
+  (is (= [5 6] (longest-consecutive-sub-seq [5 6 1 3 2 7])))
+  (is (= [] (longest-consecutive-sub-seq [7 6 5 4]))))
