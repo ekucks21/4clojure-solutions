@@ -160,3 +160,18 @@
   (is (= [0 1 2 3] (longest-consecutive-sub-seq [1 0 1 2 3 0 4 5])))
   (is (= [5 6] (longest-consecutive-sub-seq [5 6 1 3 2 7])))
   (is (= [] (longest-consecutive-sub-seq [7 6 5 4]))))
+
+(deftest tic-tac-toe-win-test
+  (is (= nil (tic-tac-toe-win [[:e :e :e]
+                               [:e :e :e]
+                               [:e :e :e]])))
+  (is (= :x (tic-tac-toe-win [[:x :e :o]
+                              [:x :e :e]
+                              [:x :e :o]])))
+  (is (= :o (tic-tac-toe-win [[:x :e :o]
+                              [:x :o :e]
+                              [:o :e :x]]))))
+
+(deftest roman-numerals->digits-test
+  (is (= 48 (roman-numerals->digits "XLVIII")))
+  (is (= 3999 (roman-numerals->digits "MMMCMXCIX"))))

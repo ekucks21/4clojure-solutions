@@ -587,4 +587,33 @@
        flatten
        ((comp #(if (nil? (first %)) [] %)))))
 
+(defn tic-tac-toe-win [board]
+  (let [horizontal-winner (ffirst (filter (comp (partial = 1) count) (map distinct board)))
+        vertical-winner (ffirst (filter
+                                 (comp (partial = 1) count)
+                                 (apply map (fn [& bar] (distinct bar)) board)))
+        diagonal-winner (ffirst (filter (comp (partial = 1) count)
+                                        (map (comp
+                                              distinct
+                                              (partial map-indexed (fn [i row] (nth row i))))
+                                             [board (rseq board)])))]
+    (first (filter #{:x :o} [horizontal-winner vertical-winner diagonal-winner]))))
+
+(defn roman-numerals->digits [roman-numerals]
+  (let [roman-numeral->digit {\M 1000
+                              \D 500
+                              \C 100
+                              \L 50
+                              \X 10
+                              \V 5
+                              \I 1}
+        raw-digits (map roman-numeral->digit roman-numerals)
+        subtractions (->> raw-digits
+                          (partition 2 1)
+                          (filter (partial apply <))
+                          (map (comp - (partial * 2) first)))]
+    (+ (apply + raw-digits) (apply + subtractions))))
+
+(defn triangle-min-path [triangle]
+  )
 
