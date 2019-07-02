@@ -1,11 +1,9 @@
 (ns four-clojure-solutions.solutions
-  (:require
-    [clojure
-     [set :as s]
-     [walk :as c]]
-    [com.rpl.specter :refer [filterer srange transform]]
-    [clojure.string :as str]))
-
+  (:require [clojure.set :as set]
+            [clojure.spec.alpha :as s]
+            [clojure.string :as str]
+            [orchestra.spec.test :as st]
+            [com.rpl.specter :refer [filterer srange transform]]))
 
 (defn infix [x & args]
   (reduce
@@ -233,7 +231,7 @@
   (case s
     #{} #{#{}}
     (let [subsets-without-first (power-set (disj s (first s)))]
-      (s/union subsets-without-first (map #(conj % (first s)) subsets-without-first)))))
+      (set/union subsets-without-first (map #(conj % (first s)) subsets-without-first)))))
 
 (defn equivalance-classes [f s]
   (set (map set (vals (group-by f s)))))
@@ -575,7 +573,7 @@
 
 (defn longest-consecutive-sub-seq [xs]
   (->> xs
-       (partition 2 1)
+       (partition-all 2 1)
        (partition-by (comp #(if (= % -1) true (gensym)) (partial apply -)))
        (sort-by count)
        reverse
@@ -585,7 +583,15 @@
        last
        ((juxt ffirst (partial map second)))
        flatten
+       (filter (complement nil?))
        ((comp #(if (nil? (first %)) [] %)))))
+
+(s/fdef longest-consecutive-sub-seq
+  :args (s/cat :xs (s/coll-of int?))
+  :ret (s/coll-of int?)
+  :fn (s/and #(<= (count (-> % :args :xs)) (count (:ret %)))
+             #(let [first-ret (or (first (:ret %)) 0)]
+                (= (:ret %) (range first-ret (+ (count (:ret %))))))))
 
 (defn tic-tac-toe-win [board]
   (let [horizontal-winner (ffirst (filter (comp (partial = 1) count) (map distinct board)))
@@ -614,6 +620,21 @@
                           (map (comp - (partial * 2) first)))]
     (+ (apply + raw-digits) (apply + subtractions))))
 
-(defn triangle-min-path [triangle]
+(defn triangle-min-path 
+  ;; (second (reduce (fn [[i sum] row]
+  ;;                   (let [[next-i next-node] (first (sort-by second
+  ;;                                                            (subvec
+  ;;                                                             (into [] (map-indexed vector row))
+  ;;                                                             i (min (+ 2 i) (count row)))))]
+  ;;                     [next-i (+ sum next-node)]))
+  ;;                 [0 0] triangle))
+  ([triangle])
+  ([[row & next-triangle-section :as triangle-section] sum i]
+   (let [[left-sum right-sum] (map (partial + sum) (subvec row i (inc i)))])
+   (-> sum
+       (triangle-min-path next-triangle-section (+ sum (nth (first triangle-section) i)) i)))
   )
+
+
+(st/instrument)
 

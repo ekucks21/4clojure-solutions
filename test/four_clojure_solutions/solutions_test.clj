@@ -1,6 +1,61 @@
 (ns four-clojure-solutions.solutions_test
+  (:require
+   [clojure.test :as t]
+   [clojure.string :as str]
+   [clojure.spec.alpha :as s]
+   [clojure.spec.test.alpha :as stest])
   (:use  [clojure.test])
   (:use  [four-clojure-solutions.solutions]))
+
+(alias 'stc 'clojure.spec.test.check)
+
+;; extracted from clojure.spec.test.alpha
+(defn failure-type [x] (::s/failure (ex-data x)))
+(defn unwrap-failure [x] (if (failure-type x) (ex-data x) x))
+
+;; modified from clojure.spec.test.alpha
+(defn abbrev-result [x]
+  (if (-> x :stc/ret :pass?)
+    (dissoc x :spec ::stc/ret)
+    (-> (dissoc x ::stc/ret)
+        (update :spec s/describe)
+        (update :failure unwrap-failure))))
+
+(defn throwable? [x]
+  (instance? Throwable x))
+
+(defn failure-report [failure]
+  (let [abbrev (abbrev-result failure)
+        expected (->> abbrev :spec rest (apply hash-map) :ret)
+        reason (:failure abbrev)]
+    (if (throwable? reason)
+      {:type :error
+       :message "Exception thrown in check"
+       :expected expected
+       :actual reason}
+      (let [data (ex-data (get-in failure
+                                  [::stc/ret
+                                   :shrunk
+                                   :result-data
+                                   :clojure.test.check.properties/error]))]
+        {:type     :fail
+         :message  (with-out-str (s/explain-out data))
+         :expected expected
+         :actual   (::s/value data)}))))
+
+(defn check?
+  [msg [_ body :as form]]
+  `(let [results# ~body
+         failures# (remove (comp :pass? ::stc/ret) results#)]
+     (if (empty? failures#)
+       [{:type    :pass
+         :message (str "Generative tests pass for "
+                       (str/join ", " (map :sym results#)))}]
+       (map failure-report failures#))))
+
+(defmethod t/assert-expr 'check?
+  [msg form]
+  `(dorun (map t/do-report ~(check? msg form))))
 
 (deftest subsets-test
   (is (= (power-set #{1 :a}) #{#{1 :a} #{:a} #{} #{1}})))
@@ -157,6 +212,7 @@
   (is (= [#{""} #{"()"} #{"()()" "(())"}] (map (fn [n] (par-combos n)) [0 1 2]))))
 
 (deftest longest-consecutive-sub-seq-test
+  (is (check? (stest/check `longest-consecutive-sub-seq)))
   (is (= [0 1 2 3] (longest-consecutive-sub-seq [1 0 1 2 3 0 4 5])))
   (is (= [5 6] (longest-consecutive-sub-seq [5 6 1 3 2 7])))
   (is (= [] (longest-consecutive-sub-seq [7 6 5 4]))))
