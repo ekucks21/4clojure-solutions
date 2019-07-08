@@ -1,9 +1,10 @@
 (ns four-clojure-solutions.solutions
   (:require [clojure.set :as set]
             [clojure.spec.alpha :as s]
+            [clojure.spec.gen.alpha :as gen]
             [clojure.string :as str]
-            [orchestra.spec.test :as st]
-            [com.rpl.specter :refer [filterer srange transform]]))
+            [com.rpl.specter :refer [filterer srange transform]]
+            [orchestra.spec.test :as st]))
 
 (defn infix [x & args]
   (reduce
@@ -574,24 +575,33 @@
 (defn longest-consecutive-sub-seq [xs]
   (->> xs
        (partition-all 2 1)
-       (partition-by (comp #(if (= % -1) true (gensym)) (partial apply -)))
-       (sort-by count)
-       reverse
-       (partition-by count)
-       (filter (comp (partial apply <) ffirst))
-       first
-       last
-       ((juxt ffirst (partial map second)))
-       flatten
-       (filter (complement nil?))
-       ((comp #(if (nil? (first %)) [] %)))))
+       (map #(hash-map :diff (apply - %) :pair %))
+       (partition-by :diff)
+       (filter (partial every? (comp (partial = -1) :diff)))
+       (map (partial map :pair))
+       (map #(conj (map second %) (ffirst %)))
+       (map (partial filter (complement nil?)))
+       (apply max-key count [])))
+
+(s/def ::addable-int (s/with-gen int? #(gen/large-integer* {:min (- (quot Long/MAX_VALUE 2))
+                                                         :max (quot Long/MAX_VALUE 2)})))
+
+(defn subtract [x y]
+  (- x y))
+
+(s/fdef subtract
+  :args (s/cat :x ::addable-int :y ::addable-int))
 
 (s/fdef longest-consecutive-sub-seq
-  :args (s/cat :xs (s/coll-of int?))
+  :args (s/cat :xs (s/coll-of ::addable-int))
   :ret (s/coll-of int?)
-  :fn (s/and #(<= (count (-> % :args :xs)) (count (:ret %)))
+  :fn (s/and #(<= (count (:ret %)) (count (-> % :args :xs)))
+             (fn [{ret :ret {xs :xs} :args}]
+                (if (empty? xs)
+                  true
+                  (some (partial = ret) (partition (count ret) 1 xs))))
              #(let [first-ret (or (first (:ret %)) 0)]
-                (= (:ret %) (range first-ret (+ (count (:ret %))))))))
+                (= (:ret %) (range first-ret (+ (count (:ret %)) first-ret))))))
 
 (defn tic-tac-toe-win [board]
   (let [horizontal-winner (ffirst (filter (comp (partial = 1) count) (map distinct board)))
@@ -632,8 +642,8 @@
   ([[row & next-triangle-section :as triangle-section] sum i]
    (let [[left-sum right-sum] (map (partial + sum) (subvec row i (inc i)))])
    (-> sum
-       (triangle-min-path next-triangle-section (+ sum (nth (first triangle-section) i)) i)))
-  )
+       (triangle-min-path next-triangle-section (+ sum (nth (first triangle-section) i)) i))))
+
 
 
 (st/instrument)
