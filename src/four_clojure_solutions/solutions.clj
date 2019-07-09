@@ -631,20 +631,29 @@
     (+ (apply + raw-digits) (apply + subtractions))))
 
 (defn triangle-min-path 
-  ;; (second (reduce (fn [[i sum] row]
-  ;;                   (let [[next-i next-node] (first (sort-by second
-  ;;                                                            (subvec
-  ;;                                                             (into [] (map-indexed vector row))
-  ;;                                                             i (min (+ 2 i) (count row)))))]
-  ;;                     [next-i (+ sum next-node)]))
-  ;;                 [0 0] triangle))
-  ([triangle])
-  ([[row & next-triangle-section :as triangle-section] sum i]
-   (let [[left-sum right-sum] (map (partial + sum) (subvec row i (inc i)))])
-   (-> sum
-       (triangle-min-path next-triangle-section (+ sum (nth (first triangle-section) i)) i))))
+  ([triangle] (triangle-min-path (rest triangle) (ffirst triangle) 0 nil))
+  ([[row & next-triangle-section] sum i lowest-sum]
+   (do
+     (println row next-triangle-section sum i lowest-sum)
+     (if (and lowest-sum (> sum lowest-sum))
+       lowest-sum
+       (let [[left-sum right-sum :as sums] (map (partial + sum) (subvec row i (+ i 2)))]
+         (if next-triangle-section
+           (->> lowest-sum
+                (triangle-min-path next-triangle-section left-sum i)
+                (triangle-min-path next-triangle-section right-sum (inc i)))
+           (first (sort (filter (complement nil?) (conj sums lowest-sum))))))))))
 
-
+(s/fdef triangle-min-path
+  :args (s/cat :triangle (s/coll-of ::addable-int))
+  :ret (s/coll-of int?)
+  :fn (s/and #(<= (count (:ret %)) (count (-> % :args :xs)))
+             (fn [{ret :ret {xs :xs} :args}]
+               (if (empty? xs)
+                 true
+                 (some (partial = ret) (partition (count ret) 1 xs))))
+             #(let [first-ret (or (first (:ret %)) 0)]
+                (= (:ret %) (range first-ret (+ (count (:ret %)) first-ret))))))
 
 (st/instrument)
 

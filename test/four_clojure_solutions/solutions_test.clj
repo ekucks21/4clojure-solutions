@@ -231,3 +231,9 @@
 (deftest roman-numerals->digits-test
   (is (= 48 (roman-numerals->digits "XLVIII")))
   (is (= 3999 (roman-numerals->digits "MMMCMXCIX"))))
+
+(deftest triangle-min-path-test
+  (is (= 7 (triangle-min-path '([1]
+                                [2 4]
+                                [5 1 4]
+                                [2 3 4 5])))))
