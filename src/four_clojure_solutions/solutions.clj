@@ -1,7 +1,7 @@
 (ns four-clojure-solutions.solutions
   (:require [clojure.set :as set]
             [clojure.spec.alpha :as s]
-            [clojure.spec.gen.alpha :as gen]
+            [clojure.test.check.generators :as gen]
             [clojure.string :as str]
             [com.rpl.specter :refer [filterer srange transform]]
             [orchestra.spec.test :as st]))
@@ -586,6 +586,9 @@
 (s/def ::addable-int (s/with-gen int? #(gen/large-integer* {:min (- (quot Long/MAX_VALUE 2))
                                                          :max (quot Long/MAX_VALUE 2)})))
 
+(s/def ::java-int (s/with-gen int? #(gen/large-integer* {:min (- Integer/MAX_VALUE)
+                                                         :max Integer/MAX_VALUE})))
+
 (defn subtract [x y]
   (- x y))
 
@@ -644,8 +647,19 @@
                 (triangle-min-path next-triangle-section right-sum (inc i)))
            (first (sort (filter (complement nil?) (conj sums lowest-sum))))))))))
 
+(s/def ::triangle (s/coll-of (s/and (s/coll-of ::java-int)
+                                    #(= (range 1 (inc (count %)))
+                                        (map count %)))))
+
 (s/fdef triangle-min-path
-  :args (s/cat :triangle (s/coll-of ::addable-int))
+  :args (s/with-gen
+          ::triangle
+          (gen/frequency [[2 (s/gen boolean?)]
+                          [8 (gen/let [size gen/small-integer]
+                               (apply gen/tuple
+                                      (map
+                                       #(gen/vector (s/gen ::java-int) %)
+                                       (range 1 (inc size)))))]]))
   :ret (s/coll-of int?)
   :fn (s/and #(<= (count (:ret %)) (count (-> % :args :xs)))
              (fn [{ret :ret {xs :xs} :args}]
