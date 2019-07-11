@@ -647,27 +647,21 @@
                 (triangle-min-path next-triangle-section right-sum (inc i)))
            (first (sort (filter (complement nil?) (conj sums lowest-sum))))))))))
 
-(s/def ::triangle (s/coll-of (s/and (s/coll-of ::java-int)
-                                    #(= (range 1 (inc (count %)))
-                                        (map count %)))))
+(s/def ::triangle (s/and (s/coll-of (s/coll-of ::java-int))
+                         #(= (range 1 (inc (count %)))
+                             (map count %))))
 
 (s/fdef triangle-min-path
-  :args (s/with-gen
-          ::triangle
-          (gen/frequency [[2 (s/gen boolean?)]
-                          [8 (gen/let [size gen/small-integer]
-                               (apply gen/tuple
-                                      (map
-                                       #(gen/vector (s/gen ::java-int) %)
-                                       (range 1 (inc size)))))]]))
-  :ret (s/coll-of int?)
-  :fn (s/and #(<= (count (:ret %)) (count (-> % :args :xs)))
-             (fn [{ret :ret {xs :xs} :args}]
-               (if (empty? xs)
-                 true
-                 (some (partial = ret) (partition (count ret) 1 xs))))
-             #(let [first-ret (or (first (:ret %)) 0)]
-                (= (:ret %) (range first-ret (+ (count (:ret %)) first-ret))))))
+  :args ::triangle
+  ;; (s/with-gen
+  ;;   ::triangle
+  ;;   (gen/let [size gen/small-integer]
+  ;;     (apply gen/tuple
+  ;;            (map
+  ;;             #(gen/vector (s/gen ::java-int) %)
+  ;;             (range 1 (inc size))))))
+  :ret int?
+  :fn #(< (:ret %) (reduce + (flatten (:args %)))))
 
 (st/instrument)
 
