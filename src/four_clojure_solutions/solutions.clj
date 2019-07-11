@@ -1,8 +1,8 @@
 (ns four-clojure-solutions.solutions
   (:require [clojure.set :as set]
             [clojure.spec.alpha :as s]
-            [clojure.test.check.generators :as gen]
             [clojure.string :as str]
+            [clojure.test.check.generators :as gen]
             [com.rpl.specter :refer [filterer srange transform]]
             [orchestra.spec.test :as st]))
 
@@ -633,35 +633,37 @@
                           (map (comp - (partial * 2) first)))]
     (+ (apply + raw-digits) (apply + subtractions))))
 
-(defn triangle-min-path 
-  ([triangle] (triangle-min-path (rest triangle) (ffirst triangle) 0 nil))
-  ([[row & next-triangle-section] sum i lowest-sum]
-   (do
-     (println row next-triangle-section sum i lowest-sum)
-     (if (and lowest-sum (> sum lowest-sum))
-       lowest-sum
-       (let [[left-sum right-sum :as sums] (map (partial + sum) (subvec row i (+ i 2)))]
-         (if next-triangle-section
-           (->> lowest-sum
-                (triangle-min-path next-triangle-section left-sum i)
-                (triangle-min-path next-triangle-section right-sum (inc i)))
-           (first (sort (filter (complement nil?) (conj sums lowest-sum))))))))))
+(defn triangle-min-path [triangle]
+  (let [min-path-search (fn min-path-search [[row & next-triangle-section] sum i lowest-sum]
+                          (cond
+                            (nil? row) sum
+                            (and lowest-sum (> sum lowest-sum)) lowest-sum
+                            :else (let [[left-sum right-sum :as sums] (map (partial + sum) (subvec row i (+ i 2)))]
+                                    (if next-triangle-section
+                                      (->> lowest-sum
+                                           (min-path-search next-triangle-section left-sum i)
+                                           (min-path-search next-triangle-section right-sum (inc i)))
+                                      (first (sort (filter (complement nil?) (conj sums lowest-sum))))))))]
+    (min-path-search (rest triangle) (ffirst triangle) 0 nil)))
 
-(s/def ::triangle (s/and (s/coll-of (s/coll-of ::java-int))
-                         #(= (range 1 (inc (count %)))
-                             (map count %))))
+(s/def ::triangle (s/with-gen
+                    (s/and (s/coll-of (s/coll-of ::java-int))
+                           #(let [first-count (count (first %))]
+                              (= (range first-count (+ first-count (count %)))
+                                 (map count %))))
+                    (fn [] (gen/let [size gen/small-integer]
+                             (apply gen/tuple
+                                    (map
+                                     #(gen/vector (s/gen ::java-int) %)
+                                     (range 1 (inc size))))))))
 
 (s/fdef triangle-min-path
-  :args ::triangle
-  ;; (s/with-gen
-  ;;   ::triangle
-  ;;   (gen/let [size gen/small-integer]
-  ;;     (apply gen/tuple
-  ;;            (map
-  ;;             #(gen/vector (s/gen ::java-int) %)
-  ;;             (range 1 (inc size))))))
-  :ret int?
-  :fn #(< (:ret %) (reduce + (flatten (:args %)))))
+  :args (s/cat :triangle ::triangle)
+  :ret (s/nilable int?)
+  :fn (fn [{ret :ret {triangle :triangle} :args}]
+         (if ret
+           (<= ret (reduce + (map #(Math/abs %) (flatten triangle))))
+           (empty? (flatten triangle)))))
 
 (st/instrument)
 
