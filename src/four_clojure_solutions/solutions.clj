@@ -665,5 +665,24 @@
            (<= ret (reduce + (map #(Math/abs %) (flatten triangle))))
            (empty? (flatten triangle)))))
 
+(defn transitive-closure [binary-relations]
+  (let [right-by-left (reduce-kv
+                       (fn [m k v] (assoc m k (map second v)))
+                       {}
+                       (group-by first binary-relations))
+        next-relations (fn next-relations [relations first-level-relations]
+                         (if (empty? first-level-relations)
+                           relations
+                           (next-relations
+                            (into relations first-level-relations)
+                            (flatten (remove nil? (map right-by-left first-level-relations))))))
+        transitive-right-by-left (reduce-kv
+                                  (fn [m k v] (assoc m k (next-relations #{} v)))
+                                  {} right-by-left)]
+    (reduce-kv (fn [s k v] (into s (map (partial vector k) v))) #{} transitive-right-by-left)))
+
+(s/fdef transitive-closure
+  :args )
+
 (st/instrument)
 

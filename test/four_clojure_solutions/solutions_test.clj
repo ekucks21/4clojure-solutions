@@ -238,3 +238,10 @@
                                 [2 4]
                                 [5 1 4]
                                 [2 3 4 5])))))
+
+(deftest transitive-closure-test
+  (is (let [more-legs
+            #{["cat" "man"] ["man" "snake"] ["spider" "cat"]}]
+        (= #{["cat" "man"] ["cat" "snake"] ["man" "snake"]
+             ["spider" "cat"] ["spider" "man"] ["spider" "snake"]}
+           (transitive-closure more-legs)))))
