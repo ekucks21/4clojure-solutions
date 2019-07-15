@@ -675,14 +675,28 @@
                            relations
                            (next-relations
                             (into relations first-level-relations)
-                            (flatten (remove nil? (map right-by-left first-level-relations))))))
+                            (set/difference
+                             (into #{} (flatten
+                                        (remove nil? (map right-by-left first-level-relations))))
+                             relations))))
         transitive-right-by-left (reduce-kv
                                   (fn [m k v] (assoc m k (next-relations #{} v)))
                                   {} right-by-left)]
     (reduce-kv (fn [s k v] (into s (map (partial vector k) v))) #{} transitive-right-by-left)))
 
+(s/def ::not-coll (s/or :b boolean? :s string? :sym symbol? :n number?))
+
+(s/def ::binary-relations (s/with-gen
+                            (s/coll-of (s/coll-of ::not-coll :kind vector? :count 2) :kind set?)
+                            #(gen/let [elements (gen/such-that (complement empty?)
+                                                               (gen/vector (s/gen ::not-coll)))]
+                               (gen/set (gen/vector (gen/elements elements) 2)))))
+
 (s/fdef transitive-closure
-  :args )
+  :args (s/cat :binary-relations ::binary-relations)
+  :ret ::binary-relations
+  :fn (fn [{ret :ret {binary-relations :binary-relations} :args}]
+        #(empty? (set/difference binary-relations ret))))
 
 (st/instrument)
 

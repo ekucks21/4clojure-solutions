@@ -240,6 +240,7 @@
                                 [2 3 4 5])))))
 
 (deftest transitive-closure-test
+  (is (check? (stest/check `transitive-closure)))
   (is (let [more-legs
             #{["cat" "man"] ["man" "snake"] ["spider" "cat"]}]
         (= #{["cat" "man"] ["cat" "snake"] ["man" "snake"]
