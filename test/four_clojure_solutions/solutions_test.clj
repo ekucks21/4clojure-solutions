@@ -246,3 +246,8 @@
         (= #{["cat" "man"] ["cat" "snake"] ["man" "snake"]
              ["spider" "cat"] ["spider" "man"] ["spider" "snake"]}
            (transitive-closure more-legs)))))
+
+(deftest word-chain-test
+  (is (= false (word-chain? #{"to" "top" "stop" "tops" "toss"})))
+  (is (= false (word-chain? #{"cot" "hot" "bat" "fat"})))
+  (is (= true (word-chain? #{"hat" "coat" "dog" "cat" "oat" "cot" "hot" "hog"}))))

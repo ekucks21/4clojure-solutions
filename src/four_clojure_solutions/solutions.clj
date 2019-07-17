@@ -675,7 +675,7 @@
                            relations
                            (next-relations
                             (into relations first-level-relations)
-                            (set/difference
+                            (clojure.set/difference
                              (into #{} (flatten
                                         (remove nil? (map right-by-left first-level-relations))))
                              relations))))
@@ -697,6 +697,23 @@
   :ret ::binary-relations
   :fn (fn [{ret :ret {binary-relations :binary-relations} :args}]
         #(empty? (set/difference binary-relations ret))))
+
+(defn word-chain? [xs]
+  (let [one-char-diff? (fn [[word1 word2]]
+                         (let [word1-set (into #{} (seq word1))
+                               word2-set (into #{} (seq word2))
+                               diff-1 (count (set/difference word2-set word1-set))
+                               diff-2 (count (set/difference word1-set word2-set))]
+                           (and (<= diff-1 1)
+                                (<= diff-2 1)
+                                (< 0 (+ diff-1 diff-2)))))
+        one-char-diffs (->> xs
+                            (iterate rest)
+                            (take-while (comp (partial < 1) count))
+                            (mapcat #(map (partial vector (first %)) (rest %)))
+                            (filter one-char-diff?))
+        _ (println one-char-diffs)]
+    (>= (count one-char-diffs) (dec (count xs)))))
 
 (st/instrument)
 
