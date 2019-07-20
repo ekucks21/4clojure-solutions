@@ -700,13 +700,12 @@
 
 (defn word-chain? [xs]
   (let [one-char-diff? (fn [[word1 word2]]
-                         (let [word1-set (into #{} (seq word1))
-                               word2-set (into #{} (seq word2))
-                               diff-1 (count (set/difference word2-set word1-set))
-                               diff-2 (count (set/difference word1-set word2-set))]
-                           (and (<= diff-1 1)
-                                (<= diff-2 1)
-                                (< 0 (+ diff-1 diff-2)))))
+                         (let [[only-left only-right] (map (comp (partial apply +) vals)
+                                                           (clojure.data/diff (frequencies word1)
+                                                                              (frequencies word2)))]
+                           (and (<= 0 only-left 1)
+                                (<= 0 only-right 1)
+                                (< 0 (+ only-left only-right) 3))))
         one-char-diffs (->> xs
                             (iterate rest)
                             (take-while (comp (partial < 1) count))
