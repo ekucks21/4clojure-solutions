@@ -2,6 +2,7 @@
   (:require [clojure.set :as set]
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
+            [clojure.data :as data]
             [clojure.test.check.generators :as gen]
             [com.rpl.specter :refer [filterer srange transform]]
             [orchestra.spec.test :as st]))
@@ -701,8 +702,8 @@
 (defn word-chain? [xs]
   (let [one-char-diff? (fn [[word1 word2]]
                          (let [[only-left only-right] (map (comp (partial apply +) vals)
-                                                           (clojure.data/diff (frequencies word1)
-                                                                              (frequencies word2)))]
+                                                           (data/diff (frequencies word1)
+                                                                      (frequencies word2)))]
                            (and (<= 0 only-left 1)
                                 (<= 0 only-right 1)
                                 (< 0 (+ only-left only-right) 3))))
@@ -711,8 +712,25 @@
                             (take-while (comp (partial < 1) count))
                             (mapcat #(map (partial vector (first %)) (rest %)))
                             (filter one-char-diff?))
-        _ (println one-char-diffs)]
-    (>= (count one-char-diffs) (dec (count xs)))))
+        adjacency-list (reduce-kv (fn [m k v] (assoc m k (into #{} (map second v))))
+                                  {}
+                                  (merge-with concat
+                                              (group-by first one-char-diffs)
+                                              (group-by second one-char-diffs)))
+        _ (println "ocd: " one-char-diffs)
+        _ (println "adj-list: " adjacency-list)
+        chain-from? (fn chain-from? [words-visited adjacent]
+                      (do
+                        (println "wv: " words-visited "adj: " adjacent)
+                        (cond
+                          (= (count xs) (count words-visited)) true
+                          (empty? adjacent) false
+                          :else (some true?
+                                      (map #(chain-from?
+                                             (conj words-visited %)
+                                             (set/difference (adjacency-list %) words-visited))
+                                           adjacent)))))]
+    (= true (some true? (map #(chain-from? #{%} (adjacency-list %)) xs)))))
 
 (st/instrument)
 
