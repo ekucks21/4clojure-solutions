@@ -712,25 +712,27 @@
                             (take-while (comp (partial < 1) count))
                             (mapcat #(map (partial vector (first %)) (rest %)))
                             (filter one-char-diff?))
-        adjacency-list (reduce-kv (fn [m k v] (assoc m k (into #{} (map second v))))
-                                  {}
-                                  (merge-with concat
-                                              (group-by first one-char-diffs)
+        adjacency-list (merge-with set/union
+                                   (reduce-kv (fn [m k v] (assoc m k (into #{} (map second v))))
+                                              {}
+                                              (group-by first one-char-diffs))
+                                   (reduce-kv (fn [m k v] (assoc m k (into #{} (map first v))))
+                                              {}
                                               (group-by second one-char-diffs)))
-        _ (println "ocd: " one-char-diffs)
-        _ (println "adj-list: " adjacency-list)
         chain-from? (fn chain-from? [words-visited adjacent]
-                      (do
-                        (println "wv: " words-visited "adj: " adjacent)
-                        (cond
-                          (= (count xs) (count words-visited)) true
-                          (empty? adjacent) false
-                          :else (some true?
-                                      (map #(chain-from?
-                                             (conj words-visited %)
-                                             (set/difference (adjacency-list %) words-visited))
-                                           adjacent)))))]
+                      (cond
+                        (= (count xs) (count words-visited)) true
+                        (empty? adjacent) false
+                        :else (some true?
+                                    (map #(chain-from?
+                                           (conj words-visited %)
+                                           (set/difference (adjacency-list %) words-visited))
+                                         adjacent))))]
     (= true (some true? (map #(chain-from? #{%} (adjacency-list %)) xs)))))
+
+(s/fdef word-chain?
+  :args (s/cat :words (s/coll-of string? :kind set?))
+  :ret boolean?)
 
 (st/instrument)
 
